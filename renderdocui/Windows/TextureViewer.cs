@@ -1526,13 +1526,11 @@ namespace renderdocui.Windows
             // things where you're flipping back and forth between overlapping
             // textures, but really needs a mode where the zoom level is changed
             // to compensate as well.
+            //CODEBEAST
             float curArea = (float)CurrentTexture.width * (float)CurrentTexture.height;
 
             float curWidth = (float)CurrentTexture.width;
             float curHeight = (float)CurrentTexture.height;
-
-            
-
 
             if (m_PrevArea > 0.0f)
             {
@@ -1561,7 +1559,7 @@ namespace renderdocui.Windows
             }
 
             m_PrevArea = curArea;
-            //CODEBEAST
+            
             m_PrevWidth = (float)CurrentTexture.width;
             m_PrevHeight = (float)CurrentTexture.height;
             //END CODEBEAST
