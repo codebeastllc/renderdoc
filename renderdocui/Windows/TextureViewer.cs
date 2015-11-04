@@ -673,7 +673,6 @@ namespace renderdocui.Windows
 
                     newPanel.DockHandler.TabPageContextMenuStrip = tabContextMenu;
                     newPanel.FormClosing += new FormClosingEventHandler(PreviewPanel_FormClosing);
-
                     newPanel.Show(m_PreviewPanel.Pane, null);
 
                     newPanel.Show();
@@ -1483,6 +1482,8 @@ namespace renderdocui.Windows
         private int prevHighestMip = -1;
 
         private float m_PrevArea = 0.0f;
+        private float m_PrevWidth = 0.0f;
+        private float m_PrevHeight = 0.0f;
 
         private void UI_OnTextureSelectionChanged()
         {
@@ -1527,23 +1528,44 @@ namespace renderdocui.Windows
             // to compensate as well.
             float curArea = (float)CurrentTexture.width * (float)CurrentTexture.height;
 
-            if(m_PrevArea > 0.0f)
+            float curWidth = (float)CurrentTexture.width;
+            float curHeight = (float)CurrentTexture.height;
+
+            
+
+
+            if (m_PrevArea > 0.0f)
             {
+                float curAspect = curWidth / curHeight;
+                float prevAspect = m_PrevWidth / m_PrevHeight;
+
                 float prevX = m_TexDisplay.offx;
                 float prevY = m_TexDisplay.offy;
+                float prevScale = m_TexDisplay.scale;
+                if (Math.Abs(curAspect - prevAspect) < 0.01) //Are the aspect ratios essentially the same?
+                {
+                    //The aspect ratios are nearly identical, so just adjust the scale to preserve the view.
+                    //We don't need to adjust position since it's in scaled pixels and not texels.
+                    m_TexDisplay.scale = prevScale * (m_PrevWidth / curWidth);
+                }
+                else //They're not, take the old area based approach
+                {
+                    // this scale factor is arbitrary really, only intention is to have
+                    // integer scales come out precisely, other 'similar' sizes will be
+                    // similar ish
+                    float scaleFactor = (float)(Math.Sqrt(curArea) / Math.Sqrt(m_PrevArea));
 
-                // this scale factor is arbitrary really, only intention is to have
-                // integer scales come out precisely, other 'similar' sizes will be
-                // similar ish
-                float scaleFactor = (float)(Math.Sqrt(curArea) / Math.Sqrt(m_PrevArea));
-
-                m_TexDisplay.offx = prevX * scaleFactor;
-                m_TexDisplay.offy = prevY * scaleFactor;
+                    m_TexDisplay.offx = prevX * scaleFactor;
+                    m_TexDisplay.offy = prevY * scaleFactor;
+                }
             }
 
             m_PrevArea = curArea;
+            //CODEBEAST
+            m_PrevWidth = (float)CurrentTexture.width;
+            m_PrevHeight = (float)CurrentTexture.height;
+            //END CODEBEAST
 
-            // refresh scroll position
             ScrollPosition = ScrollPosition;
 
             UI_UpdateStatusText();
